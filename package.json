@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "dev": "ng cache clean && ng serve",
+    "clean": "ng cache clean",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
