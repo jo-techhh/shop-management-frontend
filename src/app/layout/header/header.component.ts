@@ -1,5 +1,6 @@
 import { Component, inject, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService, Outlet } from '../../core/services/auth.service';
 import { CatalogService } from '../../core/services/catalog.service';
@@ -118,24 +119,82 @@ import { CatalogService } from '../../core/services/catalog.service';
 
         <div class="topbar-divider"></div>
 
-        <!-- User Profile -->
-        <div class="user-profile">
-          <div class="avatar-ring">
-            <img
-              [src]="authService.currentUser()?.avatarUrl"
-              alt="Avatar"
-              class="profile-avatar"
-              onerror="this.style.display='none'"
-            />
-            <span class="avatar-fallback">{{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}</span>
+        <!-- User Profile Dropdown Container -->
+        <div class="user-profile-wrapper">
+          <div
+            class="user-profile"
+            [class.is-open]="isProfileMenuOpen()"
+            (click)="toggleProfileMenu($event)"
+            title="Account Options"
+          >
+            <div class="avatar-ring">
+              <img
+                [src]="authService.currentUser()?.avatarUrl"
+                alt="Avatar"
+                class="profile-avatar"
+                onerror="this.style.display='none'"
+              />
+              <span class="avatar-fallback">{{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}</span>
+            </div>
+            <div class="profile-details">
+              <span class="profile-name">{{ authService.currentUser()?.fullName || 'User' }}</span>
+              <span class="profile-role">{{ authService.currentUser()?.role | titlecase }}</span>
+            </div>
+            <svg class="chevron-arrow" [class.rotated]="isProfileMenuOpen()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
           </div>
-          <div class="profile-details">
-            <span class="profile-name">{{ authService.currentUser()?.fullName || 'User' }}</span>
-            <span class="profile-role">{{ authService.currentUser()?.role | titlecase }}</span>
-          </div>
-          <svg class="chevron-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
+
+          <!-- Animated Profile Dropdown Menu -->
+          @if (isProfileMenuOpen()) {
+            <div class="profile-menu-panel" (click)="$event.stopPropagation()">
+              <div class="profile-menu-header">
+                <div class="menu-avatar-large">
+                  <span>{{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}</span>
+                </div>
+                <div class="menu-user-meta">
+                  <span class="menu-user-name">{{ authService.currentUser()?.fullName || 'User' }}</span>
+                  <span class="menu-user-email">{{ authService.currentUser()?.email }}</span>
+                  <span class="menu-role-tag">{{ authService.currentUser()?.role | uppercase }}</span>
+                </div>
+              </div>
+
+              <div class="profile-menu-outlet-info">
+                <span class="outlet-info-label">Active Outlet</span>
+                <span class="outlet-info-val">{{ authService.currentOutlet().name }} ({{ authService.currentOutlet().code }})</span>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <div class="menu-actions-list">
+                <button type="button" class="menu-action-item" (click)="goTo('/pos')">
+                  <svg class="action-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span>POS Terminal</span>
+                </button>
+
+                <button type="button" class="menu-action-item" (click)="goTo('/settings')">
+                  <svg class="action-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Store Settings</span>
+                </button>
+              </div>
+
+              <div class="menu-divider"></div>
+
+              <div class="menu-footer">
+                <button type="button" class="menu-logout-btn" (click)="logout()">
+                  <svg class="logout-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          }
         </div>
       </div>
     </header>
@@ -565,14 +624,190 @@ import { CatalogService } from '../../core/services/catalog.service';
       color: var(--text-muted);
       white-space: nowrap;
     }
+    .user-profile-wrapper {
+      position: relative;
+    }
+
+    .user-profile.is-open {
+      background-color: var(--bg-secondary);
+      box-shadow: 0 0 0 2px var(--color-primary-subtle);
+    }
+
+    .profile-menu-panel {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 270px;
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      overflow: hidden;
+      animation: menuFadeIn 0.15s ease-out;
+    }
+
+    .profile-menu-header {
+      padding: 0.9rem 1rem 0.8rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .menu-avatar-large {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: var(--text-inverse);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-weight: 800;
+      font-size: 1.05rem;
+    }
+
+    .menu-user-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      min-width: 0;
+    }
+
+    .menu-user-name {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-user-email {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-role-tag {
+      align-self: flex-start;
+      margin-top: 0.2rem;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      background-color: var(--color-primary-subtle);
+      color: var(--color-primary);
+      letter-spacing: 0.05em;
+    }
+
+    .profile-menu-outlet-info {
+      padding: 0.55rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      background-color: var(--bg-surface);
+      font-size: 0.7rem;
+    }
+
+    .outlet-info-label {
+      color: var(--text-dim);
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .outlet-info-val {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .menu-divider {
+      height: 1px;
+      background-color: var(--border-color);
+      margin: 0.15rem 0;
+    }
+
+    .menu-actions-list {
+      padding: 0.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .menu-action-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 0.7rem;
+      width: 100%;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.12s ease;
+      text-align: left;
+    }
+
+    .menu-action-item:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .action-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+    }
+
+    .menu-footer {
+      padding: 0.35rem;
+    }
+
+    .menu-logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-danger);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .menu-logout-btn:hover {
+      background-color: var(--color-danger-subtle);
+    }
+
+    .logout-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--color-danger);
+    }
   `]
 })
 export class HeaderComponent {
   public themeService = inject(ThemeService);
   public authService = inject(AuthService);
   public catalogService = inject(CatalogService);
+  private router = inject(Router);
 
   public isOutletMenuOpen = signal<boolean>(false);
+  public isProfileMenuOpen = signal<boolean>(false);
 
   public onSearchInput(event: Event): void {
     const val = (event.target as HTMLInputElement).value;
@@ -582,6 +817,17 @@ export class HeaderComponent {
   public toggleOutletMenu(event: Event): void {
     event.stopPropagation();
     this.isOutletMenuOpen.update(open => !open);
+    if (this.isOutletMenuOpen()) {
+      this.isProfileMenuOpen.set(false);
+    }
+  }
+
+  public toggleProfileMenu(event: Event): void {
+    event.stopPropagation();
+    this.isProfileMenuOpen.update(open => !open);
+    if (this.isProfileMenuOpen()) {
+      this.isOutletMenuOpen.set(false);
+    }
   }
 
   public onSelectOutlet(outlet: Outlet, event: Event): void {
@@ -593,6 +839,17 @@ export class HeaderComponent {
   @HostListener('document:click')
   public closeMenuOnOutsideClick(): void {
     this.isOutletMenuOpen.set(false);
+    this.isProfileMenuOpen.set(false);
+  }
+
+  public goTo(path: string): void {
+    this.isProfileMenuOpen.set(false);
+    this.router.navigate([path]);
+  }
+
+  public logout(): void {
+    this.isProfileMenuOpen.set(false);
+    this.authService.logout();
   }
 
   public toggleTheme(): void {
