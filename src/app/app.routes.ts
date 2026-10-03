@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
+import { LoginComponent } from './features/auth/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PosComponent } from './features/pos/pos.component';
 import { ProductsComponent } from './features/products/products.component';
@@ -11,11 +12,17 @@ import { AnalyticsComponent } from './features/analytics/analytics.component';
 import { OutletsComponent } from './features/outlets/outlets.component';
 import { EventsComponent } from './features/events/events.component';
 import { SettingsComponent } from './features/settings/settings.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    component: LoginComponent
+  },
+  {
     path: '',
     component: MainLayoutComponent,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'overview', pathMatch: 'full' },
       { path: 'overview', component: DashboardComponent },

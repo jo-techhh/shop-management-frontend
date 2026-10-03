@@ -23,7 +23,7 @@ export class ApiService {
   private getHeaders(): HttpHeaders {
     let token: string | null = null;
     if (isPlatformBrowser(this.platformId)) {
-      token = localStorage.getItem('token');
+      token = localStorage.getItem('token') || localStorage.getItem('access_token');
     }
 
     let headers = new HttpHeaders({
@@ -47,6 +47,10 @@ export class ApiService {
       map(res => res.data !== undefined ? res.data : res),
       catchError((err: HttpErrorResponse) => {
         this.isConnected.set(false);
+        // Do NOT swallow 401 Unauthorized with fallbackMock — let the interceptor/guard handle refresh & redirect
+        if (err.status === 401) {
+          throw err;
+        }
         if (fallbackMock !== undefined) {
           return of(fallbackMock);
         }
@@ -64,6 +68,9 @@ export class ApiService {
       map(res => res.data !== undefined ? res.data : res),
       catchError((err: HttpErrorResponse) => {
         this.isConnected.set(false);
+        if (err.status === 401) {
+          throw err;
+        }
         if (fallbackMock !== undefined) {
           return of(fallbackMock);
         }
@@ -81,6 +88,9 @@ export class ApiService {
       map(res => res.data !== undefined ? res.data : res),
       catchError((err: HttpErrorResponse) => {
         this.isConnected.set(false);
+        if (err.status === 401) {
+          throw err;
+        }
         if (fallbackMock !== undefined) {
           return of(fallbackMock);
         }
@@ -98,6 +108,9 @@ export class ApiService {
       map(res => res.data !== undefined ? res.data : res),
       catchError((err: HttpErrorResponse) => {
         this.isConnected.set(false);
+        if (err.status === 401) {
+          throw err;
+        }
         if (fallbackMock !== undefined) {
           return of(fallbackMock);
         }
