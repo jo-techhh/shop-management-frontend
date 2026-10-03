@@ -156,7 +156,10 @@ export class CatalogService {
     });
   }
 
-  public addProduct(product: Partial<Product>): void {
+  public addProduct(product: Partial<Product> & { barcode?: string; sku?: string }): void {
+    const customSku = product.sku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`;
+    const customBarcode = product.barcode || `890${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+
     const newProd: Product = {
       id: `prd-${Date.now()}`,
       name: product.name || 'New Retail Product',
@@ -169,8 +172,8 @@ export class CatalogService {
       variants: [
         {
           id: `var-${Date.now()}`,
-          sku: `SKU-${Math.floor(1000 + Math.random() * 9000)}`,
-          barcode: `890${Math.floor(1000000000 + Math.random() * 9000000000)}`,
+          sku: customSku,
+          barcode: customBarcode,
           name: 'Standard Unit',
           price: product.price || 0,
           costPrice: (product.price || 0) * 0.6,

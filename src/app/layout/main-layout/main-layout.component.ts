@@ -9,7 +9,10 @@ import { HeaderComponent } from '../header/header.component';
   imports: [RouterOutlet, SidebarComponent, HeaderComponent],
   template: `
     <div class="app-layout">
+      <!-- Sidebar: has its own brand header built in, full height -->
       <app-sidebar />
+
+      <!-- Main wrapper: header + content -->
       <div class="main-wrapper">
         <app-header />
         <main class="content-area">
@@ -24,6 +27,7 @@ import { HeaderComponent } from '../header/header.component';
       min-height: 100vh;
       width: 100vw;
       overflow-x: hidden;
+      background-color: var(--bg-app);
     }
 
     .main-wrapper {
@@ -31,6 +35,7 @@ import { HeaderComponent } from '../header/header.component';
       display: flex;
       flex-direction: column;
       min-width: 0;
+      /* Sidebar is sticky height:100vh, header is sticky top:0 */
     }
 
     .content-area {
@@ -38,6 +43,7 @@ import { HeaderComponent } from '../header/header.component';
       background-color: var(--bg-app);
       display: flex;
       flex-direction: column;
+      overflow: auto;
     }
   `]
 })

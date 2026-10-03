@@ -10,99 +10,138 @@ import { InventoryService } from '../../core/services/inventory.service';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="dashboard-page bg-grid-subtle">
-      <!-- Dashboard Header -->
-      <div class="welcome-banner">
+    <div class="sakai-dashboard bg-grid-subtle">
+      <!-- Welcome Header Bar -->
+      <div class="dashboard-banner">
         <div>
-          <h1 class="page-title">Good morning, {{ authService.currentUser().fullName }}</h1>
-          <p class="page-subtitle">Here's what's happening across your outlets today.</p>
+          <h1 class="banner-title">Welcome back, {{ authService.currentUser().fullName }}!</h1>
+          <p class="banner-sub">Here is your daily retail operations overview and real-time outlet performance.</p>
         </div>
         <div class="banner-actions">
           <a routerLink="/pos" class="btn-primary">
-            <span>+ Open POS Register</span>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Open POS Register</span>
           </a>
         </div>
       </div>
 
-      <!-- 4 Primary KPI Cards -->
-      <div class="metrics-grid">
-        <div class="grid-card metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Sales Revenue</span>
-            <span class="badge badge-success">+14.2%</span>
+      <!-- Sakai Signature 4 KPI Stat Cards -->
+      <div class="sakai-stats-grid">
+        <!-- Card 1: Orders -->
+        <div class="sakai-card stat-card">
+          <div class="stat-main">
+            <div>
+              <span class="stat-label">Orders</span>
+              <div class="stat-value font-mono">152</div>
+            </div>
+            <div class="stat-icon-wrapper icon-blue">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+            </div>
           </div>
-          <div class="metric-value">₹82.4K</div>
-          <div class="metric-footer">vs ₹72.1K yesterday</div>
+          <div class="stat-footer">
+            <span class="stat-trend badge-success">+24 new</span>
+            <span class="stat-desc">since last visit</span>
+          </div>
         </div>
 
-        <div class="grid-card metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Completed Orders</span>
-            <span class="badge badge-primary">+8.4%</span>
+        <!-- Card 2: Revenue -->
+        <div class="sakai-card stat-card">
+          <div class="stat-main">
+            <div>
+              <span class="stat-label">Revenue</span>
+              <div class="stat-value font-mono">₹82,400</div>
+            </div>
+            <div class="stat-icon-wrapper icon-green">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
           </div>
-          <div class="metric-value">284</div>
-          <div class="metric-footer">24 orders processing</div>
+          <div class="stat-footer">
+            <span class="stat-trend badge-success">%52+</span>
+            <span class="stat-desc">since last week</span>
+          </div>
         </div>
 
-        <div class="grid-card metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Active Stock Ledger</span>
-            <span class="badge badge-neutral">4 Outlets</span>
+        <!-- Card 3: Customers -->
+        <div class="sakai-card stat-card">
+          <div class="stat-main">
+            <div>
+              <span class="stat-label">Customers</span>
+              <div class="stat-value font-mono">28,441</div>
+            </div>
+            <div class="stat-icon-wrapper icon-purple">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5 5 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
           </div>
-          <div class="metric-value">12,842</div>
-          <div class="metric-footer">{{ inventoryService.lowStockAlertsCount() }} item low stock</div>
+          <div class="stat-footer">
+            <span class="stat-trend badge-success">520</span>
+            <span class="stat-desc">newly registered</span>
+          </div>
         </div>
 
-        <div class="grid-card metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Active Cash Register</span>
-            <span class="badge badge-success">Online</span>
+        <!-- Card 4: Inventory Items -->
+        <div class="sakai-card stat-card">
+          <div class="stat-main">
+            <div>
+              <span class="stat-label">Inventory Items</span>
+              <div class="stat-value font-mono">12,842</div>
+            </div>
+            <div class="stat-icon-wrapper icon-orange">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+              </svg>
+            </div>
           </div>
-          <div class="metric-value">Terminal 01</div>
-          <div class="metric-footer">Float ₹5,000 | Cash ₹18,450</div>
+          <div class="stat-footer">
+            <span class="stat-trend badge-warning">{{ inventoryService.lowStockAlertsCount() }} low</span>
+            <span class="stat-desc">across 5 outlets</span>
+          </div>
         </div>
       </div>
 
-      <!-- Middle Content: Sales Chart + Technical Recent Events -->
-      <div class="content-grid">
-        <!-- Sales Overview Chart -->
-        <div class="grid-card chart-card">
-          <div class="card-title-bar">
+      <!-- Main Dashboard Grid: Revenue Stream + Event Activity -->
+      <div class="sakai-content-grid">
+        <!-- Sales Overview SVG Chart Card -->
+        <div class="sakai-card chart-card">
+          <div class="card-header-bar">
             <div>
-              <h2 class="card-title">Sales Overview</h2>
-              <p class="card-sub">Real-time revenue stream across active retail terminals</p>
+              <h2 class="card-heading">Sales Overview</h2>
+              <p class="card-subheading">Real-time revenue stream across active retail terminals</p>
             </div>
-            <div class="time-tabs">
-              <button class="time-tab active">Today</button>
-              <button class="time-tab">Week</button>
-              <button class="time-tab">Month</button>
+            <div class="time-pill-group">
+              <button class="time-pill active">Today</button>
+              <button class="time-pill">Week</button>
+              <button class="time-pill">Month</button>
             </div>
           </div>
 
-          <div class="chart-container bg-grid-dots">
+          <div class="chart-wrapper bg-grid-dots">
             <svg viewBox="0 0 600 200" class="chart-svg">
               <defs>
-                <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.20"/>
+                <linearGradient id="sakaiChartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.25"/>
                   <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.0"/>
                 </linearGradient>
               </defs>
-              <!-- Grid Lines -->
-              <line x1="0" y1="40" x2="600" y2="40" stroke="var(--border-subtle)" stroke-dasharray="3 3" />
-              <line x1="0" y1="90" x2="600" y2="90" stroke="var(--border-subtle)" stroke-dasharray="3 3" />
-              <line x1="0" y1="140" x2="600" y2="140" stroke="var(--border-subtle)" stroke-dasharray="3 3" />
+              <line x1="0" y1="40" x2="600" y2="40" stroke="var(--border-subtle)" stroke-dasharray="4 4" />
+              <line x1="0" y1="90" x2="600" y2="90" stroke="var(--border-subtle)" stroke-dasharray="4 4" />
+              <line x1="0" y1="140" x2="600" y2="140" stroke="var(--border-subtle)" stroke-dasharray="4 4" />
 
-              <!-- Path Area -->
-              <path d="M 0,150 Q 100,120 180,135 T 320,55 T 460,85 T 600,25 L 600,195 L 0,195 Z" fill="url(#chartGradient)" />
-              <!-- Path Line -->
-              <path d="M 0,150 Q 100,120 180,135 T 320,55 T 460,85 T 600,25" fill="none" stroke="var(--color-primary)" stroke-width="2" />
+              <path d="M 0,150 Q 100,120 180,135 T 320,55 T 460,85 T 600,25 L 600,195 L 0,195 Z" fill="url(#sakaiChartGrad)" />
+              <path d="M 0,150 Q 100,120 180,135 T 320,55 T 460,85 T 600,25" fill="none" stroke="var(--color-primary)" stroke-width="3" />
 
-              <!-- Data Points -->
-              <circle cx="180" cy="135" r="3.5" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2" />
-              <circle cx="320" cy="55" r="3.5" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2" />
-              <circle cx="600" cy="25" r="3.5" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2" />
+              <circle cx="180" cy="135" r="4" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2.5" />
+              <circle cx="320" cy="55" r="4" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2.5" />
+              <circle cx="600" cy="25" r="4" fill="var(--bg-surface)" stroke="var(--color-primary)" stroke-width="2.5" />
             </svg>
-            <div class="chart-labels">
+            <div class="chart-timestamps font-mono">
               <span>08:00 AM</span>
               <span>10:00 AM</span>
               <span>12:00 PM</span>
@@ -113,167 +152,154 @@ import { InventoryService } from '../../core/services/inventory.service';
           </div>
         </div>
 
-        <!-- Technical Recent Events Widget -->
-        <div class="grid-card events-card">
-          <div class="card-title-bar">
+        <!-- Recent Events Activity Card -->
+        <div class="sakai-card activity-card">
+          <div class="card-header-bar">
             <div>
-              <h2 class="card-title">Recent Events</h2>
-              <p class="card-sub">Event-driven stream activity</p>
+              <h2 class="card-heading">Recent Activity</h2>
+              <p class="card-subheading">Operational event stream</p>
             </div>
-            <a routerLink="/events" class="link-more">View All →</a>
+            <a routerLink="/events" class="view-link">View All →</a>
           </div>
 
-          <div class="events-list">
-            <!-- Event 1: Success -->
-            <div class="event-item">
-              <span class="event-dot success"></span>
-              <div class="event-body">
-                <div class="event-head">
-                  <span class="event-title">Order ORD-2026-849201</span>
-                  <span class="event-meta">6:00 PM · <code class="srv-tag">billing-service</code></span>
+          <div class="activity-timeline">
+            @for (evt of eventService.events().slice(0, 4); track evt.id) {
+              <div class="activity-row">
+                <span class="activity-dot" [class.success]="evt.status === 'success'" [class.warning]="evt.status === 'warning'"></span>
+                <div class="activity-body">
+                  <span class="activity-title">{{ evt.summary }}</span>
+                  <span class="activity-time font-mono">{{ evt.timestamp | date:'shortTime' }} • {{ evt.service }}</span>
                 </div>
-                <div class="event-desc">Checkout saga completed successfully</div>
               </div>
-            </div>
-
-            <!-- Event 2: Information / Blue -->
-            <div class="event-item">
-              <span class="event-dot info"></span>
-              <div class="event-body">
-                <div class="event-head">
-                  <span class="event-title">Stock reservation</span>
-                  <span class="event-meta">5:58 PM · <code class="srv-tag">inventory-service</code></span>
-                </div>
-                <div class="event-desc">SKU KB-SW-BRN · 1 unit reserved</div>
-              </div>
-            </div>
-
-            <!-- Event 3: Information / Blue -->
-            <div class="event-item">
-              <span class="event-dot info"></span>
-              <div class="event-body">
-                <div class="event-head">
-                  <span class="event-title">Stock transfer</span>
-                  <span class="event-meta">3:45 PM · <code class="srv-tag">inventory-service</code></span>
-                </div>
-                <div class="event-desc">Main Flagship → Koramangala (35 pcs)</div>
-              </div>
-            </div>
-
-            <!-- Event 4: Warning / Amber -->
-            <div class="event-item">
-              <span class="event-dot warning"></span>
-              <div class="event-body">
-                <div class="event-head">
-                  <span class="event-title">Low-stock alert</span>
-                  <span class="event-meta">1:10 PM · <code class="srv-tag">inventory-service</code></span>
-                </div>
-                <div class="event-desc">SKU TEE-WHT-M · 5 remaining</div>
-              </div>
-            </div>
+            }
           </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .dashboard-page {
-      padding: 1.25rem 1.5rem;
+    .sakai-dashboard {
+      padding: 1.5rem 1.75rem;
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
-      min-height: calc(100vh - 56px);
+      gap: 1.5rem;
+      min-height: calc(100vh - 64px);
     }
 
-    .welcome-banner {
+    .dashboard-banner {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .page-title {
-      font-size: 1.35rem;
-      font-weight: 700;
+    .banner-title {
+      font-size: 1.5rem;
+      font-weight: 800;
       color: var(--text-main);
       letter-spacing: -0.02em;
     }
 
-    .page-subtitle {
-      font-size: 0.825rem;
+    .banner-sub {
+      font-size: 0.85rem;
       color: var(--text-muted);
-      margin-top: 0.15rem;
+      margin-top: 0.2rem;
     }
 
-    .metrics-grid {
+    /* 4 Sakai Stat Cards */
+    .sakai-stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+    }
+
+    .stat-card {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       gap: 1rem;
     }
 
-    .metric-card {
-      padding: 1rem 1.15rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .metric-header {
+    .stat-main {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
     }
 
-    .metric-label {
-      font-size: 0.7rem;
+    .stat-label {
+      font-size: 0.825rem;
       font-weight: 600;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
-    .metric-value {
-      font-size: 1.6rem;
-      font-weight: 700;
+    .stat-value {
+      font-size: 1.65rem;
+      font-weight: 800;
       color: var(--text-main);
-      letter-spacing: -0.02em;
+      margin-top: 0.25rem;
     }
 
-    .metric-footer {
-      font-size: 0.725rem;
+    .stat-icon-wrapper {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .icon-blue { background-color: var(--color-blue-subtle); color: var(--color-blue); }
+    .icon-green { background-color: var(--color-primary-subtle); color: var(--color-primary); }
+    .icon-purple { background-color: var(--color-purple-subtle); color: var(--color-purple); }
+    .icon-orange { background-color: var(--color-warning-subtle); color: var(--color-warning); }
+
+    .stat-footer {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+    }
+
+    .stat-trend {
+      font-weight: 700;
+    }
+
+    .stat-desc {
       color: var(--text-muted);
     }
 
-    .content-grid {
+    /* Content Grid */
+    .sakai-content-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
-      gap: 1rem;
+      gap: 1.25rem;
     }
 
-    .chart-card, .events-card {
-      padding: 1.15rem;
+    .chart-card, .activity-card {
+      padding: 1.25rem;
       display: flex;
       flex-direction: column;
     }
 
-    .card-title-bar {
+    .card-header-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .card-title {
-      font-size: 0.95rem;
-      font-weight: 600;
+    .card-heading {
+      font-size: 1rem;
+      font-weight: 700;
       color: var(--text-main);
     }
 
-    .card-sub {
-      font-size: 0.725rem;
+    .card-subheading {
+      font-size: 0.775rem;
       color: var(--text-muted);
     }
 
-    .time-tabs {
+    .time-pill-group {
       display: flex;
       background: var(--bg-secondary);
       border: 1px solid var(--border-color);
@@ -281,110 +307,89 @@ import { InventoryService } from '../../core/services/inventory.service';
       padding: 2px;
     }
 
-    .time-tab {
+    .time-pill {
       background: transparent;
       border: none;
       color: var(--text-muted);
-      font-size: 0.725rem;
-      padding: 0.2rem 0.55rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
       border-radius: var(--radius-xs);
       cursor: pointer;
+      font-weight: 500;
     }
 
-    .time-tab.active {
+    .time-pill.active {
       background: var(--bg-surface);
       color: var(--text-main);
-      font-weight: 600;
-      box-shadow: var(--shadow-sm);
+      font-weight: 700;
+      box-shadow: var(--shadow-xs);
     }
 
-    .chart-container {
-      width: 100%;
+    .chart-wrapper {
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 0.5rem;
+      border-radius: var(--radius-md);
+      padding: 0.75rem;
     }
 
     .chart-svg {
       width: 100%;
-      height: 175px;
+      height: 180px;
     }
 
-    .chart-labels {
+    .chart-timestamps {
       display: flex;
       justify-content: space-between;
-      font-size: 0.675rem;
+      font-size: 0.7rem;
       color: var(--text-muted);
-      margin-top: 0.25rem;
-      padding: 0 0.25rem;
+      margin-top: 0.35rem;
     }
 
-    .events-list {
+    .activity-timeline {
       display: flex;
       flex-direction: column;
+      gap: 1rem;
+    }
+
+    .activity-row {
+      display: flex;
+      align-items: flex-start;
       gap: 0.75rem;
     }
 
-    .event-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.65rem;
-    }
-
-    .event-dot {
-      width: 7px;
-      height: 7px;
+    .activity-dot {
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
+      background-color: var(--color-primary);
       margin-top: 0.35rem;
       flex-shrink: 0;
     }
 
-    .event-dot.success { background-color: var(--color-success); }
-    .event-dot.info { background-color: var(--color-info); }
-    .event-dot.warning { background-color: var(--color-warning); }
-    .event-dot.failure { background-color: var(--color-danger); }
+    .activity-dot.success { background-color: var(--color-success); }
+    .activity-dot.warning { background-color: var(--color-warning); }
 
-    .event-body {
+    .activity-body {
       display: flex;
       flex-direction: column;
-      gap: 0.1rem;
-      flex: 1;
+      gap: 0.15rem;
     }
 
-    .event-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-    }
-
-    .event-title {
-      font-weight: 600;
+    .activity-title {
+      font-size: 0.85rem;
       color: var(--text-main);
+      line-height: 1.3;
     }
 
-    .event-meta {
-      font-size: 0.675rem;
+    .activity-time {
+      font-size: 0.725rem;
       color: var(--text-muted);
     }
 
-    .srv-tag {
-      font-family: monospace;
-      background-color: var(--bg-secondary);
-      padding: 0.05rem 0.3rem;
-      border-radius: 3px;
-    }
-
-    .event-desc {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .link-more {
-      font-size: 0.75rem;
+    .view-link {
+      font-size: 0.8rem;
       color: var(--color-primary);
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
     }
   `]
 })

@@ -43,7 +43,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
           <input
             type="text"
             class="input-field search-box"
-            placeholder="Search product, brand, category, SKU..."
+            placeholder="Search product, brand, category, SKU, barcode..."
             [(ngModel)]="searchQuery"
           />
         </div>
@@ -62,13 +62,13 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
         </div>
       </div>
 
-      <!-- 13. Clean Table View -->
+      <!-- Clean Table View -->
       @if (viewMode() === 'table') {
         <div class="grid-card table-wrapper">
           <table class="grid-table">
             <thead>
               <tr>
-                <th>Primary SKU</th>
+                <th>Primary SKU & Barcode</th>
                 <th>Product Name</th>
                 <th>Brand</th>
                 <th>Category</th>
@@ -79,46 +79,77 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
               </tr>
             </thead>
             <tbody>
-              @for (prod of filteredProducts(); track prod.id) {
-                <tr>
-                  <td>
-                    <code class="sku-chip font-mono">
-                      {{ prod.variants.length > 0 ? prod.variants[0].sku : 'SKU-GEN' }}
-                    </code>
-                  </td>
-                  <td>
-                    <div class="prod-cell">
-                      <span class="prod-name">{{ prod.name }}</span>
-                      <span class="prod-desc-sub">{{ prod.description }}</span>
-                    </div>
-                  </td>
-                  <td><span class="prod-brand">{{ prod.brand }}</span></td>
-                  <td><span class="badge badge-neutral font-mono">{{ prod.category }}</span></td>
-                  <td><strong class="price-val font-mono">₹{{ prod.price | number:'1.2-2' }}</strong></td>
-                  <td>
-                    <span class="stock-val font-mono" [class.stock-warn]="prod.totalStock <= 10">
-                      {{ prod.totalStock }} pcs
-                    </span>
-                  </td>
-                  <td>
-                    <span class="variants-badge font-mono">{{ prod.variants.length }} options</span>
-                  </td>
-                  <td style="text-align: right;">
-                    <button class="btn-ghost action-btn">Edit</button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="8">
-                    <div class="empty-state">
-                      <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <span class="empty-state-title">No products match search criteria</span>
-                      <span class="empty-state-desc">Try clearing your search query or selecting a different category.</span>
-                    </div>
-                  </td>
-                </tr>
+              <!-- Skeleton Loader Rows (shown while loading) -->
+              @if (isLoading()) {
+                @for (item of skeletonRows; track $index) {
+                  <tr class="skeleton-row">
+                    <td>
+                      <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div class="skeleton-cell" style="width:80px;height:12px;border-radius:4px;"></div>
+                        <div class="skeleton-cell" style="width:110px;height:10px;border-radius:4px;opacity:0.6;"></div>
+                      </div>
+                    </td>
+                    <td>
+                      <div style="display:flex;flex-direction:column;gap:5px;">
+                        <div class="skeleton-cell" style="width:160px;height:12px;border-radius:4px;"></div>
+                        <div class="skeleton-cell" style="width:120px;height:10px;border-radius:4px;opacity:0.6;"></div>
+                      </div>
+                    </td>
+                    <td><div class="skeleton-cell" style="width:70px;height:12px;border-radius:4px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:75px;height:20px;border-radius:9999px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:70px;height:12px;border-radius:4px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:55px;height:12px;border-radius:4px;"></div></td>
+                    <td><div class="skeleton-cell" style="width:60px;height:12px;border-radius:4px;"></div></td>
+                    <td style="text-align:right;"><div class="skeleton-cell" style="width:40px;height:26px;border-radius:6px;margin-left:auto;"></div></td>
+                  </tr>
+                }
+              } @else {
+                @for (prod of filteredProducts(); track prod.id) {
+                  <tr>
+                    <td>
+                      <div class="sku-cell">
+                        <code class="sku-chip font-mono">
+                          {{ prod.variants && prod.variants.length > 0 ? prod.variants[0].sku : 'SKU-GEN' }}
+                        </code>
+                        <span class="barcode-sub font-mono">
+                          {{ prod.variants && prod.variants.length > 0 ? prod.variants[0].barcode : 'No Barcode' }}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="prod-cell">
+                        <span class="prod-name">{{ prod.name }}</span>
+                        <span class="prod-desc-sub">{{ prod.description }}</span>
+                      </div>
+                    </td>
+                    <td><span class="prod-brand">{{ prod.brand }}</span></td>
+                    <td><span class="badge badge-neutral font-mono">{{ getCatName(prod.category) }}</span></td>
+                    <td><strong class="price-val font-mono">₹{{ getProdPrice(prod) | number:'1.2-2' }}</strong></td>
+                    <td>
+                      <span class="stock-val font-mono" [class.stock-warn]="getProdStock(prod) <= 10">
+                        {{ getProdStock(prod) }} pcs
+                      </span>
+                    </td>
+                    <td>
+                      <span class="variants-badge font-mono">{{ prod.variants ? prod.variants.length : 1 }} options</span>
+                    </td>
+                    <td style="text-align: right;">
+                      <button class="btn-ghost action-btn">Edit</button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8">
+                      <div class="empty-state">
+                        <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <span class="empty-state-title">No products match search criteria</span>
+                        <span class="empty-state-desc">Try clearing your search query or selecting a different category.</span>
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
@@ -129,8 +160,8 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
           @for (prod of filteredProducts(); track prod.id) {
             <div class="grid-card product-card">
               <div class="card-top">
-                <span class="badge badge-neutral font-mono">{{ prod.category }}</span>
-                <span class="sku-chip font-mono">{{ prod.variants[0]?.sku || 'SKU-00' }}</span>
+                <span class="badge badge-neutral font-mono">{{ getCatName(prod.category) }}</span>
+                <code class="sku-chip font-mono">{{ prod.variants && prod.variants[0]?.sku ? prod.variants[0].sku : 'SKU-00' }}</code>
               </div>
 
               <div class="card-product-name">{{ prod.name }}</div>
@@ -140,11 +171,11 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
               <div class="card-bottom">
                 <div>
                   <span class="price-lbl">RETAIL PRICE</span>
-                  <div class="card-price font-mono">₹{{ prod.price | number:'1.2-2' }}</div>
+                  <div class="card-price font-mono">₹{{ getProdPrice(prod) | number:'1.2-2' }}</div>
                 </div>
                 <div style="text-align: right;">
                   <span class="price-lbl">TOTAL STOCK</span>
-                  <div class="card-stock font-mono">{{ prod.totalStock }} pcs</div>
+                  <div class="card-stock font-mono">{{ getProdStock(prod) }} pcs</div>
                 </div>
               </div>
             </div>
@@ -157,19 +188,44 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
         <div class="modal-backdrop" (click)="showAddModal.set(false)">
           <div class="modal-box" (click)="$event.stopPropagation()">
             <div class="modal-header">
-              <span class="modal-title">Add New Catalog Product</span>
+              <span class="modal-title">Add New Product & Barcode</span>
               <button class="close-btn" (click)="showAddModal.set(false)">✕</button>
             </div>
             <form (ngSubmit)="submitNewProduct()">
               <div class="form-grid">
                 <div class="form-group full-width">
                   <label class="form-label">Product Title</label>
-                  <input type="text" class="input-field" [(ngModel)]="newProdName" name="name" required />
+                  <input type="text" class="input-field" [(ngModel)]="newProdName" name="name" placeholder="e.g. Ergonomic Keyboard" required />
                 </div>
+
+                <!-- Barcode Field (Supports Hardware Gun Scanning or Auto Generation) -->
+                <div class="form-group full-width">
+                  <div class="label-with-action">
+                    <label class="form-label">Barcode (Scan product or Auto-Generate)</label>
+                    <button type="button" class="btn-text-action" (click)="autoGenerateBarcode()">⚡ Auto Generate</button>
+                  </div>
+                  <div class="barcode-input-wrapper">
+                    <input
+                      type="text"
+                      class="input-field font-mono"
+                      [(ngModel)]="newProdBarcode"
+                      name="barcode"
+                      placeholder="Point scanner gun here or type barcode..."
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">SKU Code</label>
+                  <input type="text" class="input-field font-mono" [(ngModel)]="newProdSku" name="sku" placeholder="e.g. KB-SW-BRN" required />
+                </div>
+                
                 <div class="form-group">
                   <label class="form-label">Brand</label>
-                  <input type="text" class="input-field" [(ngModel)]="newProdBrand" name="brand" required />
+                  <input type="text" class="input-field" [(ngModel)]="newProdBrand" name="brand" placeholder="e.g. Keychron" required />
                 </div>
+
                 <div class="form-group">
                   <label class="form-label">Category</label>
                   <select class="input-field" [(ngModel)]="newProdCat" name="category">
@@ -180,18 +236,21 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
                     <option value="Accessories">Accessories</option>
                   </select>
                 </div>
+
                 <div class="form-group">
                   <label class="form-label">Price (₹ INR)</label>
-                  <input type="number" class="input-field" [(ngModel)]="newProdPrice" name="price" required />
+                  <input type="number" class="input-field font-mono" [(ngModel)]="newProdPrice" name="price" required />
                 </div>
-                <div class="form-group">
+
+                <div class="form-group full-width">
                   <label class="form-label">Initial Stock Count</label>
-                  <input type="number" class="input-field" [(ngModel)]="newProdStock" name="stock" required />
+                  <input type="number" class="input-field font-mono" [(ngModel)]="newProdStock" name="stock" required />
                 </div>
               </div>
+
               <div class="modal-actions">
                 <button type="button" class="btn-secondary" (click)="showAddModal.set(false)">Cancel</button>
-                <button type="submit" class="btn-primary">Create Product</button>
+                <button type="submit" class="btn-primary">Create Product & Assign Barcode</button>
               </div>
             </form>
           </div>
@@ -268,7 +327,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
 
     .search-input-box {
       position: relative;
-      width: 340px;
+      width: 360px;
     }
 
     .search-icon {
@@ -309,6 +368,17 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
       background-color: var(--color-primary-subtle);
     }
 
+    .sku-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .barcode-sub {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+    }
+
     .prod-cell {
       display: flex;
       flex-direction: column;
@@ -323,7 +393,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
 
     .prod-desc-sub {
       font-size: 0.6875rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
     }
 
     .prod-brand {
@@ -355,7 +425,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
 
     .variants-badge {
       font-size: 0.72rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
     }
 
     .action-btn {
@@ -399,7 +469,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
 
     .card-desc {
       font-size: 0.75rem;
-      color: var(--text-dim);
+      color: var(--text-muted);
       margin: 0.35rem 0;
       line-height: 1.35;
     }
@@ -447,7 +517,7 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
       background-color: var(--bg-surface);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
-      width: 460px;
+      width: 480px;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
@@ -490,6 +560,21 @@ import { CatalogService, Product } from '../../core/services/catalog.service';
       gap: 0.3rem;
     }
 
+    .label-with-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-text-action {
+      background: transparent;
+      border: none;
+      color: var(--color-primary);
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
     .form-label {
       font-size: 0.75rem;
       font-weight: 600;
@@ -513,11 +598,22 @@ export class ProductsComponent {
   public selectedCat = signal<string>('All');
   public categories = ['All', 'Electronics', 'Keyboards', 'Audio', 'Apparel', 'Accessories'];
 
+  // Skeleton loader state — shows shimmer rows for 1.5s on initial render
+  public isLoading = signal<boolean>(true);
+  public skeletonRows = Array(7).fill(null);
+
+  constructor() {
+    // Simulate loading delay — in production this resolves when API data arrives
+    setTimeout(() => this.isLoading.set(false), 1500);
+  }
+
   public newProdName = '';
   public newProdBrand = '';
+  public newProdBarcode = '';
+  public newProdSku = '';
   public newProdCat = 'Electronics';
-  public newProdPrice = 1000;
-  public newProdStock = 25;
+  public newProdPrice = 1290;
+  public newProdStock = 50;
 
   public filteredProducts = computed(() => {
     const q = this.searchQuery.toLowerCase().trim();
@@ -525,31 +621,69 @@ export class ProductsComponent {
     let prods = this.catalogService.products();
 
     if (cat !== 'All') {
-      prods = prods.filter(p => p.category.toLowerCase() === cat.toLowerCase());
+      prods = prods.filter(p => this.getCatName(p.category).toLowerCase() === cat.toLowerCase());
     }
 
     if (q) {
       prods = prods.filter(p =>
         p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        p.variants.some(v => v.sku.toLowerCase().includes(q))
+        (p.brand && p.brand.toLowerCase().includes(q)) ||
+        this.getCatName(p.category).toLowerCase().includes(q) ||
+        (p.variants && p.variants.some((v: any) => (v.sku && v.sku.toLowerCase().includes(q)) || (v.barcode && v.barcode.includes(q))))
       );
     }
 
     return prods;
   });
 
+  public getCatName(cat: any): string {
+    if (!cat) return 'General';
+    if (typeof cat === 'object') return cat.name || cat.title || 'General';
+    return String(cat);
+  }
+
+  public getProdPrice(prod: any): number {
+    if (prod.price !== undefined && prod.price !== null && prod.price !== 0) return Number(prod.price);
+    if (prod.variants && prod.variants.length > 0 && prod.variants[0].price !== undefined) {
+      return Number(prod.variants[0].price);
+    }
+    return 1290;
+  }
+
+  public getProdStock(prod: any): number {
+    if (prod.totalStock !== undefined && prod.totalStock !== null && prod.totalStock !== 0) return Number(prod.totalStock);
+    if (prod.variants && prod.variants.length > 0) {
+      return prod.variants.reduce((acc: number, v: any) => acc + (v.stockQuantity || 0), 0);
+    }
+    return 50;
+  }
+
+  public autoGenerateBarcode(): void {
+    this.newProdBarcode = `890${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+    if (!this.newProdSku) {
+      this.newProdSku = `SKU-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+  }
+
   public submitNewProduct(): void {
+    if (!this.newProdBarcode) {
+      this.autoGenerateBarcode();
+    }
+
     this.catalogService.addProduct({
       name: this.newProdName,
       brand: this.newProdBrand,
       category: this.newProdCat,
       price: this.newProdPrice,
-      totalStock: this.newProdStock
+      totalStock: this.newProdStock,
+      barcode: this.newProdBarcode,
+      sku: this.newProdSku || `SKU-${Math.floor(1000 + Math.random() * 9000)}`
     });
+
     this.showAddModal.set(false);
     this.newProdName = '';
     this.newProdBrand = '';
+    this.newProdBarcode = '';
+    this.newProdSku = '';
   }
 }
