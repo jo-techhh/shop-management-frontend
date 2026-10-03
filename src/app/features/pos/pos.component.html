@@ -1,0 +1,232 @@
+<div class="pos-layout">
+  <!-- Left Panel: Fast Product Selector & Barcode Scan -->
+  <div class="pos-main">
+    <!-- POS Barcode & Filter Bar -->
+    <div class="pos-topbar">
+      <div class="barcode-search-box">
+        <svg class="barcode-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+        </svg>
+        <input
+          type="text"
+          class="barcode-input"
+          placeholder="Scan barcode or enter SKU / product name..."
+          [(ngModel)]="barcodeQuery"
+          (keydown.enter)="onBarcodeSubmit()"
+          autofocus
+        />
+      </div>
+
+      <div class="category-tabs">
+        @for (cat of categories; track cat) {
+          <button
+            type="button"
+            class="category-tab"
+            [class.active]="selectedCategory() === cat"
+            (click)="selectedCategory.set(cat)"
+          >
+            {{ cat }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Fast Product Grid -->
+    <div class="catalog-grid">
+      @for (prod of filteredProducts(); track prod.id) {
+        @for (variant of prod.variants; track variant.id) {
+          <div class="catalog-tile" (click)="posService.addToCart(variant, prod.name)">
+            <div class="tile-top">
+              <span class="tile-category font-mono">{{ prod.category }}</span>
+              <span class="tile-stock font-mono" [class.stock-low]="variant.stockQuantity <= 5">
+                {{ variant.stockQuantity }} in stock
+              </span>
+            </div>
+            <div class="tile-title">{{ prod.name }}</div>
+            <div class="tile-bottom">
+              <span class="tile-sku font-mono">{{ variant.sku }}</span>
+              <span class="tile-price font-mono">₹{{ variant.price | number:'1.2-2' }}</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Right Panel: High-Speed Cashier Cart & Tender Panel -->
+  <div class="pos-cart-panel">
+    <div class="cart-header">
+      <div class="cart-title">
+        <span>Current Ticket</span>
+        <span class="cart-count-pill font-mono">{{ posService.cartItems().length }}</span>
+      </div>
+      @if (posService.cartItems().length > 0) {
+        <button class="clear-cart-btn" (click)="posService.clearCart()">Clear</button>
+      }
+    </div>
+
+    <!-- Ticket Items List -->
+    <div class="cart-items-container">
+      @if (posService.cartItems().length === 0) {
+        <div class="empty-ticket-state">
+          <svg class="ticket-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span class="empty-ticket-text">Register ticket is empty</span>
+          <span class="empty-ticket-sub">Scan barcodes or click products on the left</span>
+        </div>
+      } @else {
+        <div class="cart-items-list">
+          @for (item of posService.cartItems(); track item.variantId) {
+            <div class="ticket-row">
+              <div class="ticket-col-info">
+                <span class="ticket-item-name">{{ item.name }}</span>
+                <span class="ticket-item-sku font-mono">{{ item.sku }} · ₹{{ item.unitPrice | number:'1.2-2' }}</span>
+              </div>
+              <div class="ticket-col-qty">
+                <button class="qty-btn" (click)="posService.updateQuantity(item.variantId, item.quantity - 1)">-</button>
+                <span class="qty-num font-mono">{{ item.quantity }}</span>
+                <button class="qty-btn" (click)="posService.updateQuantity(item.variantId, item.quantity + 1)">+</button>
+              </div>
+              <div class="ticket-col-total font-mono">
+                ₹{{ item.total | number:'1.2-2' }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Financial Breakdown & Tender Calculations -->
+    <div class="cart-tender-footer">
+      <div class="financial-row">
+        <span class="fin-label">Subtotal</span>
+        <span class="fin-value font-mono">₹{{ posService.subtotal() | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Discount Quick Selectors -->
+      <div class="discount-row">
+        <span class="fin-label">Discount</span>
+        <div class="discount-pills">
+          <button
+            type="button"
+            class="disc-pill"
+            [class.active]="posService.activeDiscountPercent() === 0"
+            (click)="posService.activeDiscountPercent.set(0)"
+          >0%</button>
+          <button
+            type="button"
+            class="disc-pill"
+            [class.active]="posService.activeDiscountPercent() === 5"
+            (click)="posService.activeDiscountPercent.set(5)"
+          >5%</button>
+          <button
+            type="button"
+            class="disc-pill"
+            [class.active]="posService.activeDiscountPercent() === 10"
+            (click)="posService.activeDiscountPercent.set(10)"
+          >10%</button>
+        </div>
+      </div>
+
+      <div class="financial-row">
+        <span class="fin-label">GST Tax (18%)</span>
+        <span class="fin-value font-mono">₹{{ posService.taxAmount() | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Highly Visible Grand Total -->
+      <div class="grand-total-banner">
+        <span class="grand-total-label">TOTAL PAYABLE</span>
+        <span class="grand-total-amount font-mono">₹{{ posService.totalAmount() | number:'1.2-2' }}</span>
+      </div>
+
+      <!-- Fast Payment Tender Buttons: CASH / UPI / CARD -->
+      <div class="tender-buttons-grid">
+        <button
+          class="pay-tender-btn tender-cash"
+          [disabled]="posService.cartItems().length === 0"
+          (click)="triggerPayment('cash')"
+        >
+          <span class="tender-btn-title">CASH</span>
+          <span class="tender-btn-sub font-mono">Exact tender</span>
+        </button>
+
+        <button
+          class="pay-tender-btn tender-upi"
+          [disabled]="posService.cartItems().length === 0"
+          (click)="triggerPayment('upi')"
+        >
+          <span class="tender-btn-title">UPI</span>
+          <span class="tender-btn-sub font-mono">QR Dynamic</span>
+        </button>
+
+        <button
+          class="pay-tender-btn tender-card"
+          [disabled]="posService.cartItems().length === 0"
+          (click)="triggerPayment('card')"
+        >
+          <span class="tender-btn-title">CARD</span>
+          <span class="tender-btn-sub font-mono">POS Swipe/Tap</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 80mm ESC/POS Thermal Receipt Modal -->
+  @if (showReceiptModal()) {
+    <div class="modal-overlay" (click)="showReceiptModal.set(false)">
+      <div class="receipt-dialog" (click)="$event.stopPropagation()">
+        <div class="dialog-header">
+          <span class="dialog-title font-mono">ESC/POS Thermal Receipt #ORD-{{ receiptDateNum }}</span>
+          <button class="dialog-close" (click)="showReceiptModal.set(false)">✕</button>
+        </div>
+
+        <!-- Authentic 80mm Paper Texture -->
+        <div class="thermal-receipt-paper font-mono">
+          <div class="paper-center store-heading">RETAIL OPERATIONS PLATFORM</div>
+          <div class="paper-center">{{ authService.currentOutlet().name }}</div>
+          <div class="paper-center">{{ authService.currentOutlet().code }} · GSTIN: 29AABCU9603R1Z7</div>
+          <div class="paper-divider">------------------------------------------</div>
+          <div class="paper-between">
+            <span>Date: {{ today | date:'medium' }}</span>
+            <span>Reg: POS-01</span>
+          </div>
+          <div class="paper-between">
+            <span>Cashier: {{ authService.currentUser()?.fullName }}</span>
+            <span>Type: {{ lastPaymentMethod() | uppercase }}</span>
+          </div>
+          <div class="paper-divider">------------------------------------------</div>
+
+          @for (item of lastReceiptItems(); track item.variantId) {
+            <div class="paper-between">
+              <span>{{ item.quantity }}x {{ item.name }}</span>
+              <span>₹{{ item.total | number:'1.2-2' }}</span>
+            </div>
+          }
+
+          <div class="paper-divider">------------------------------------------</div>
+          <div class="paper-between">
+            <span>Subtotal:</span>
+            <span>₹{{ lastReceiptSubtotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="paper-between">
+            <span>GST (18%):</span>
+            <span>₹{{ lastReceiptTax() | number:'1.2-2' }}</span>
+          </div>
+          <div class="paper-between paper-total-bold">
+            <span>GRAND TOTAL:</span>
+            <span>₹{{ lastReceiptTotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="paper-divider">==========================================</div>
+          <div class="paper-center">Saga Correlation ID: 849201-92b0-4f</div>
+          <div class="paper-center">THANK YOU FOR YOUR VISIT!</div>
+        </div>
+
+        <div class="dialog-footer">
+          <button class="btn-secondary" (click)="showReceiptModal.set(false)">Close</button>
+          <button class="btn-primary" (click)="showReceiptModal.set(false)">Print Receipt</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

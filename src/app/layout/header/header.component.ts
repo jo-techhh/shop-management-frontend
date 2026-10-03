@@ -122,16 +122,16 @@ import { CatalogService } from '../../core/services/catalog.service';
         <div class="user-profile">
           <div class="avatar-ring">
             <img
-              [src]="authService.currentUser().avatarUrl"
+              [src]="authService.currentUser()?.avatarUrl"
               alt="Avatar"
               class="profile-avatar"
               onerror="this.style.display='none'"
             />
-            <span class="avatar-fallback">{{ authService.currentUser().fullName.charAt(0) }}</span>
+            <span class="avatar-fallback">{{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}</span>
           </div>
           <div class="profile-details">
-            <span class="profile-name">{{ authService.currentUser().fullName }}</span>
-            <span class="profile-role">{{ authService.currentUser().role | titlecase }}</span>
+            <span class="profile-name">{{ authService.currentUser()?.fullName || 'User' }}</span>
+            <span class="profile-role">{{ authService.currentUser()?.role | titlecase }}</span>
           </div>
           <svg class="chevron-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>

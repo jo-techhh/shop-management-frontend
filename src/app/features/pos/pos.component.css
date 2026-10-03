@@ -1,0 +1,450 @@
+.pos-layout {
+  display: flex;
+  height: calc(100vh - 56px);
+  background-color: var(--bg-app);
+  overflow: hidden;
+}
+
+.pos-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+.pos-topbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.barcode-search-box {
+  position: relative;
+  width: 100%;
+}
+
+.barcode-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.barcode-input {
+  width: 100%;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.barcode-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-subtle);
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+}
+
+.category-tab {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.category-tab.active {
+  background-color: var(--color-primary);
+  color: var(--text-inverse);
+  border-color: var(--color-primary);
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.catalog-tile {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.catalog-tile:hover {
+  border-color: var(--color-primary);
+}
+
+.tile-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+}
+
+.tile-category {
+  color: var(--text-dim);
+}
+
+.tile-stock {
+  color: var(--color-success);
+}
+
+.tile-stock.stock-low {
+  color: var(--color-warning);
+}
+
+.tile-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.25;
+}
+
+.tile-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.tile-sku {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.tile-price {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* RIGHT CART PANEL */
+.pos-cart-panel {
+  width: 360px;
+  background-color: var(--bg-surface);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.cart-count-pill {
+  font-size: 0.6875rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.05rem 0.35rem;
+  border-radius: var(--radius-xs);
+}
+
+.clear-cart-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-danger);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cart-items-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1rem;
+}
+
+.empty-ticket-state {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--text-dim);
+  gap: 0.35rem;
+}
+
+.ticket-empty-icon {
+  width: 36px;
+  height: 36px;
+  opacity: 0.35;
+}
+
+.empty-ticket-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.empty-ticket-sub {
+  font-size: 0.72rem;
+}
+
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ticket-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ticket-col-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.ticket-item-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.ticket-item-sku {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.ticket-col-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0.5rem;
+}
+
+.qty-btn {
+  width: 22px;
+  height: 22px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: var(--radius-xs);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.qty-num {
+  font-size: 0.8125rem;
+  width: 18px;
+  text-align: center;
+}
+
+.ticket-col-total {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* CART TENDER FOOTER */
+.cart-tender-footer {
+  padding: 0.875rem 1rem;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.financial-row, .discount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.discount-pills {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.disc-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.disc-pill.active {
+  background: var(--color-primary);
+  color: var(--text-inverse);
+  border-color: var(--color-primary);
+}
+
+.grand-total-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border-color);
+  margin-top: 0.2rem;
+}
+
+.grand-total-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+}
+
+.grand-total-amount {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+/* 3 PAYMENT BUTTONS: CASH, UPI, CARD */
+.tender-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.pay-tender-btn {
+  padding: 0.55rem 0.25rem;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #FFFFFF;
+  transition: opacity 0.12s ease;
+}
+
+.pay-tender-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pay-tender-btn:not(:disabled):hover {
+  opacity: 0.9;
+}
+
+.tender-cash { background-color: #16A34A; }
+.tender-upi { background-color: #7C3AED; }
+.tender-card { background-color: #2563EB; }
+
+.tender-btn-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.tender-btn-sub {
+  font-size: 0.5625rem;
+  opacity: 0.85;
+}
+
+/* MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.receipt-dialog {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  width: 380px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dialog-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.dialog-close {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.thermal-receipt-paper {
+  background: #FFFFFF;
+  color: #111111;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.paper-center { text-align: center; }
+.paper-divider { text-align: center; margin: 0.25rem 0; opacity: 0.5; }
+.paper-between { display: flex; justify-content: space-between; }
+.paper-total-bold { font-weight: 800; font-size: 0.8125rem; margin-top: 0.25rem; }
+.store-heading { font-weight: 800; font-size: 0.75rem; }
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}

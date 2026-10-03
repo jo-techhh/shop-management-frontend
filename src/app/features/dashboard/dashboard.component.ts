@@ -14,7 +14,7 @@ import { InventoryService } from '../../core/services/inventory.service';
       <!-- Welcome Header Bar -->
       <div class="dashboard-banner">
         <div>
-          <h1 class="banner-title">Welcome back, {{ authService.currentUser().fullName }}!</h1>
+          <h1 class="banner-title">Welcome back, {{ authService.currentUser()?.fullName || 'Staff' }}!</h1>
           <p class="banner-sub">Here is your daily retail operations overview and real-time outlet performance.</p>
         </div>
         <div class="banner-actions">
