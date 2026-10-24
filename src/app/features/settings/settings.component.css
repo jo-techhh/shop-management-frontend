@@ -17,3 +17,18 @@
 .gateway-status-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px; }.status-box { display:flex;flex-direction:column;gap:6px;border:1px solid var(--border-color);border-radius:5px;padding:16px;font-size:var(--font-small); }.status-box strong { font-weight:400;overflow-wrap:anywhere; }.status-box>span { color:var(--text-muted); }
 @media(max-width:1000px) { .theme-picker-grid,.gateway-status-grid { grid-template-columns:1fr; } }
 @media(max-width:680px) { .settings-page { padding:24px 16px; }.settings-card { padding:20px; } }
+
+.theme-card-option {
+  transition: background-color var(--interaction-duration) ease, border-color var(--interaction-duration) ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .theme-card-option:not(:disabled):hover {
+    background: var(--bg-secondary);
+    border-color: var(--border-hover);
+  }
+  .theme-card-option.selected:not(:disabled):hover {
+    background: var(--color-primary-subtle);
+    border-color: var(--color-primary);
+  }
+}
+.theme-card-option:not(:disabled):active { background: var(--bg-pressed); }

@@ -26,3 +26,19 @@
 .loading-spinner { width:15px;height:15px;border:2px solid rgb(255 255 255 / 35%);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
 @media(max-width:680px) { .login-story { left:24px;top:24px; }.theme-bar { right:24px;top:20px; }.login-page { padding:100px 24px 48px; } }
+
+.theme-toggle-btn, .password-toggle-btn {
+  transition: background-color var(--interaction-duration) ease, border-color var(--interaction-duration) ease, color var(--interaction-duration) ease;
+}
+.password-toggle-btn { border-radius: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .theme-toggle-btn:not(:disabled):hover {
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
+    color: var(--text-main);
+  }
+  .password-toggle-btn:not(:disabled):hover {
+    background: var(--bg-hover);
+    color: var(--text-main);
+  }
+}
