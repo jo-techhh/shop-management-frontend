@@ -1,0 +1,10 @@
+<div class="settings-page">
+  <header class="page-header"><div><h1 class="page-title">Settings</h1><p class="page-subtitle">Appearance and live service availability.</p></div></header>
+  <section class="grid-card settings-card"><div class="card-head"><h2 class="card-title">Appearance</h2><p class="card-sub">This preference is saved on this device.</p></div><div class="theme-picker-grid">
+    @for (mode of themes; track mode) { <button type="button" class="theme-card-option" [class.selected]="theme.themeMode() === mode" [attr.aria-pressed]="theme.themeMode() === mode" (click)="theme.setTheme(mode)"><div class="preview-box" [class.light-preview]="mode === 'light'" [class.dark-preview]="mode === 'dark'" [class.system-preview]="mode === 'system'"><div class="p-header"></div><div class="p-body"></div></div><span class="theme-meta"><strong>{{ mode | titlecase }}</strong><span>{{ mode === 'system' ? 'Follow device appearance' : mode === 'light' ? 'Light surfaces and blue accents' : 'Soft contrast in dark environments' }}</span></span></button> }
+  </div></section>
+  <section class="grid-card settings-card"><div class="card-head"><h2 class="card-title">Service availability</h2><button class="btn-secondary" (click)="load()" [disabled]="loading()">Check again</button></div>
+    @if (loading() || error()) { <app-data-state [loading]="loading()" [error]="error()" (retry)="load()" /> }
+    @else if (health(); as status) { <p>Gateway: {{ status['status'] }}</p><div class="gateway-status-grid">@for (service of status['dependencies'] | keyvalue; track service.key) { <div class="status-box"><strong>{{ service.key }}</strong><span>{{ service.value }}</span></div> }</div> }
+  </section>
+</div>

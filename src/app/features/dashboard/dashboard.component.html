@@ -1,0 +1,28 @@
+<div class="report-page">
+  <header class="report-heading"><div><div class="breadcrumb">Workspace / {{ detailed() ? 'Analytics' : 'Overview' }}</div><h1>{{ detailed() ? 'Sales analytics' : 'Store overview' }}</h1><p>{{ auth.currentOutlet()?.name || 'Select an outlet' }} · Figures are calculated from persisted orders.</p></div><div class="report-actions"><select class="input-field" aria-label="Report period" [ngModel]="days()" (ngModelChange)="days.set(+$event)"><option [ngValue]="1">Today</option><option [ngValue]="7">Last 7 days</option><option [ngValue]="30">Last 30 days</option></select><button class="btn-secondary" (click)="load()" [disabled]="loading()">Refresh</button><a class="btn-primary" routerLink="/pos"><svg lucidePlus [size]="16"></svg>New sale</a></div></header>
+  @if (auth.outletError()) { <div class="message error" role="alert">{{ auth.outletError() }}<button class="btn-secondary" (click)="auth.loadOutlets()">Retry outlets</button></div> }
+  @if (!auth.currentOutlet() && !auth.outletError()) { <app-data-state title="Choose an outlet" description="Create an outlet from Outlets, or select an existing outlet from the header." /> }
+  @else if (loading() || error()) { <app-data-state [loading]="loading()" [error]="error()" (retry)="load()" /> }
+  @else if (report(); as stats) {
+    <section class="report-metrics"><article><span>Revenue from completed sales</span><strong>{{ stats['revenue'] | currency:'INR' }}</strong></article><article><span>Orders created</span><strong>{{ stats['order_count'] }}</strong></article><article><span>Completed orders</span><strong>{{ stats['completed_orders'] }}</strong></article><article><span>Identified customers</span><strong>{{ stats['customer_count'] }}</strong></article></section>
+    <section class="panel"><header><div><h2>Daily revenue</h2><p>Completed sales in the selected period, by Indian Standard Time.</p></div></header>
+      @if (!stats['completed_orders']) { <app-data-state title="No completed sales yet" description="Revenue will appear here after orders are successfully paid. Try a different reporting period." /> }
+      @else { <div class="revenue-bars" role="img" aria-label="Daily revenue from completed orders">@for (day of stats['daily_sales']; track day.date) { <div class="bar-column"><span class="bar-amount">{{ day.revenue | number:'1.0-0' }}</span><div class="bar-track"><i [style.height.%]="day.revenue / chartMax() * 100" [attr.title]="day.date + ': ' + day.revenue"></i></div><small>{{ day.date | date:'MMM d' }}</small></div> }</div> }
+    </section>
+    @if (detailed()) {
+      <section class="report-metrics"><article><span>Tax recorded</span><strong>{{ stats['tax_amount'] | currency:'INR' }}</strong></article><article><span>Discounts applied</span><strong>{{ stats['discount_amount'] | currency:'INR' }}</strong></article></section>
+      <section class="panel"><header><h2>Product sales</h2></header>@if (!stats['products'].length) { <app-data-state title="No product sales" description="Products sold in completed orders will appear here." /> } @else { <div class="table-scroll"><table class="grid-table"><thead><tr><th>SKU</th><th>Units sold</th><th>Line revenue before order discounts and tax</th></tr></thead><tbody>@for (product of stats['products']; track product.sku) { <tr><td>{{ product.sku }}</td><td>{{ product.quantity }}</td><td>{{ product.revenue | currency:'INR' }}</td></tr> }</tbody></table></div> }</section>
+    } @else {
+      <section class="panel"><header><h2>Recent orders</h2><a routerLink="/orders">View all <svg lucideArrowRight [size]="14"></svg></a></header>
+        @if (!orders().length) { <app-data-state title="No orders yet" description="Start your first sale from Point of sale." /> }
+        @else { <div class="table-scroll"><table class="grid-table"><thead><tr><th>Invoice</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody>@for (order of orders(); track order['id']) { <tr><td>{{ order['invoice_number'] }}</td><td>{{ order['created_at'] | date:'medium' }}</td><td>{{ order['total_amount'] | currency:'INR' }}</td><td>{{ order['status'] }}</td></tr> }</tbody></table></div> }
+      </section>
+      <section class="panel"><header><h2>Stock alerts</h2><a routerLink="/inventory">View inventory <svg lucideArrowRight [size]="14"></svg></a></header>
+        @if (inventory.loading() || inventory.error()) { <app-data-state [loading]="inventory.loading()" [error]="inventory.error()" (retry)="inventory.refresh()" /> }
+        @else if (!inventory.stockItems().length) { <app-data-state title="No inventory data" description="Add products and opening stock to see stock health." /> }
+        @else if (!alerts().length) { <p class="all-clear">All product variants are above their reorder thresholds.</p> }
+        @else { <div class="table-scroll"><table class="grid-table"><thead><tr><th>Product</th><th>SKU</th><th>Available</th><th>Status</th></tr></thead><tbody>@for (item of alerts(); track item['variant_id']) { <tr><td>{{ item['product_name'] }}</td><td>{{ item['sku'] }}</td><td>{{ item['available_quantity'] }}</td><td>{{ item['status'] }}</td></tr> }</tbody></table></div> }
+      </section>
+    }
+  }
+</div>

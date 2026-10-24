@@ -1,241 +1,112 @@
-import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, of } from 'rxjs';
-
-export interface User {
-  id: string;
-  username: string;
-  email: string;
-  fullName: string;
-  role: 'superadmin' | 'store_admin' | 'cashier';
-  outletId: string;
-  avatarUrl?: string;
-}
+import { defer, firstValueFrom, from, switchMap, tap } from 'rxjs';
+import { API_BASE_URL } from '../api.config';
+import { errorMessage } from './api.service';
 
 export interface Outlet {
-  id: string;
-  name: string;
-  code: string;
-  city: string;
-  status: 'active' | 'maintenance' | 'operational';
-  todaySales: string;
-  stockCount: number;
-  openRegisters: number;
-  lowStockCount: number;
+  id: string; name: string; code: string; address: string | null; phone: string | null;
+  tax_number: string | null; receipt_footer: string | null; is_active: boolean;
 }
-
-export interface TokenResponse {
-  access_token: string;
-  refresh_token: string;
-  token_type?: string;
-  expires_in?: number;
+export interface User {
+  id: string; email: string; fullName: string; role: string; outletId: string | null;
+  permissions: string[]; isSuperuser: boolean;
 }
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
+interface UserDto {
+  id: string; email: string; full_name: string; outlet_id: string | null;
+  is_superuser: boolean; permissions: string[]; roles: { name: string }[]; outlet: Outlet | null;
 }
+export interface TokenResponse { access_token: string; refresh_token: string; }
+export interface LoginCredentials { email: string; password: string; }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private platformId = inject(PLATFORM_ID);
-  private baseUrl = 'http://localhost:8000/api/v1';
-
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly baseUrl = inject(API_BASE_URL);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private sessionPromise: Promise<boolean> | null = null;
+  private readonly selectedOutletId = signal<string | null>(this.browser ? localStorage.getItem('selected_outlet_id') : null);
   public readonly currentUser = signal<User | null>(null);
+  public readonly availableOutlets = signal<Outlet[]>([]);
+  public readonly outletError = signal('');
+  public readonly sessionError = signal('');
+  public readonly outletsLoading = signal(false);
+  public readonly currentOutlet = computed(() => this.availableOutlets().find(o => o.id === this.selectedOutletId()) ?? null);
+  public readonly isAuthenticated = computed(() => this.currentUser() !== null);
 
-  public readonly availableOutlets = signal<Outlet[]>([
-    {
-      id: 'out-01',
-      name: 'Main Flagship Store',
-      code: 'MFS-BLR',
-      city: 'Bengaluru',
-      status: 'active',
-      todaySales: '₹82,400',
-      stockCount: 5420,
-      openRegisters: 2,
-      lowStockCount: 2
-    },
-    {
-      id: 'out-02',
-      name: 'Koramangala',
-      code: 'KOR-BLR',
-      city: 'Bengaluru',
-      status: 'active',
-      todaySales: '₹34,120',
-      stockCount: 2890,
-      openRegisters: 1,
-      lowStockCount: 1
-    },
-    {
-      id: 'out-03',
-      name: 'Trivandrum',
-      code: 'TRV-KER',
-      city: 'Kerala',
-      status: 'active',
-      todaySales: '₹28,900',
-      stockCount: 2150,
-      openRegisters: 1,
-      lowStockCount: 0
-    },
-    {
-      id: 'out-04',
-      name: 'Nagercoil',
-      code: 'NC-TN',
-      city: 'Tamil Nadu',
-      status: 'active',
-      todaySales: '₹19,450',
-      stockCount: 1382,
-      openRegisters: 1,
-      lowStockCount: 0
-    },
-    {
-      id: 'out-05',
-      name: 'Warehouses',
-      code: 'WH-HUB',
-      city: 'Central Hub',
-      status: 'operational',
-      todaySales: '₹0 (Logistics)',
-      stockCount: 18400,
-      openRegisters: 0,
-      lowStockCount: 3
-    }
-  ]);
-
-  public readonly currentOutlet = signal<Outlet>(this.availableOutlets()[0]);
-
-  public readonly isAuthenticated = computed(() => !!this.currentUser() || !!this.getAccessToken());
-
-  constructor() {
-    this.initUserSession();
-  }
-
-  private isBrowser(): boolean {
-    return isPlatformBrowser(this.platformId);
-  }
-
-  public getAccessToken(): string | null {
-    if (!this.isBrowser()) return null;
-    return localStorage.getItem('token') || localStorage.getItem('access_token');
-  }
-
-  public getRefreshToken(): string | null {
-    if (!this.isBrowser()) return null;
-    return localStorage.getItem('refresh_token');
-  }
-
-  public setTokens(accessToken: string, refreshToken?: string): void {
-    if (!this.isBrowser()) return;
-    localStorage.setItem('token', accessToken);
-    localStorage.setItem('access_token', accessToken);
-    if (refreshToken) {
-      localStorage.setItem('refresh_token', refreshToken);
-    }
-  }
-
-  public clearTokens(): void {
-    if (!this.isBrowser()) return;
+  getAccessToken(): string | null { return this.browser ? localStorage.getItem('access_token') : null; }
+  getRefreshToken(): string | null { return this.browser ? localStorage.getItem('refresh_token') : null; }
+  setTokens(access: string, refresh?: string): void {
+    if (!this.browser) return;
+    localStorage.setItem('access_token', access);
     localStorage.removeItem('token');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
+    if (refresh) localStorage.setItem('refresh_token', refresh);
   }
-
-  private initUserSession(): void {
-    if (!this.isBrowser()) return;
-
-    const token = this.getAccessToken();
-    if (token) {
-      this.checkCurrentUser();
-    } else {
-      // Set default demo user if token absent for instant preview or allow login
-      this.currentUser.set({
-        id: 'usr-101',
-        username: 'jobi',
-        email: 'jobi@retailops.io',
-        fullName: 'Jobi',
-        role: 'store_admin',
-        outletId: 'out-01',
-        avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jobi'
-      });
+  clearTokens(): void {
+    if (this.browser) for (const key of ['token', 'access_token', 'refresh_token', 'selected_outlet_id']) localStorage.removeItem(key);
+    this.currentUser.set(null); this.availableOutlets.set([]); this.selectedOutletId.set(null); this.sessionPromise = null;
+  }
+  hasPermission(permission: string): boolean {
+    const user = this.currentUser(); return !!user && (user.isSuperuser || user.permissions.includes(permission));
+  }
+  async ensureSession(force = false): Promise<boolean> {
+    if (!this.browser || !this.getAccessToken()) return false;
+    if (force) this.sessionPromise = null;
+    this.sessionPromise ??= this.restoreSession();
+    return this.sessionPromise;
+  }
+  private async restoreSession(): Promise<boolean> {
+    try {
+      const dto = await firstValueFrom(this.http.get<UserDto>(`${this.baseUrl}/auth/me`));
+      this.currentUser.set({ id: dto.id, email: dto.email, fullName: dto.full_name,
+        role: dto.roles.map(r => r.name).join(', '), outletId: dto.outlet_id,
+        permissions: dto.permissions, isSuperuser: dto.is_superuser });
+      await this.loadOutlets(dto.outlet);
+      return true;
+    } catch (error) {
+      this.sessionError.set(errorMessage(error));
+      this.clearTokens();
+      throw error;
     }
   }
-
-  public checkCurrentUser(): void {
-    const token = this.getAccessToken();
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
-
-    this.http.get<any>(`${this.baseUrl}/auth/me`, { headers }).subscribe({
-      next: (res) => {
-        const user = res.data !== undefined ? res.data : res;
-        if (user && user.id) {
-          this.currentUser.set({
-            id: user.id,
-            username: user.email ? user.email.split('@')[0] : 'user',
-            email: user.email,
-            fullName: user.full_name || 'Retail User',
-            role: user.is_superuser ? 'superadmin' : 'store_admin',
-            outletId: user.outlet_id || 'out-01',
-            avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.full_name || 'User'}`
-          });
-        }
-      },
-      error: (err) => {
-        // Interceptor will handle 401 refresh/redirect
-      }
+  async loadOutlets(assigned?: Outlet | null): Promise<void> {
+    this.outletsLoading.set(true); this.outletError.set('');
+    try {
+      const outlets = this.hasPermission('outlet:read')
+        ? await firstValueFrom(this.http.get<Outlet[]>(`${this.baseUrl}/outlets`))
+        : assigned ? [assigned] : this.availableOutlets().filter(o => o.id === this.currentUser()?.outletId);
+      this.availableOutlets.set(outlets);
+      const selectable = this.currentUser()?.isSuperuser ? outlets : outlets.filter(o => o.id === this.currentUser()?.outletId);
+      const selected = selectable.find(o => o.id === this.selectedOutletId()) ?? selectable.find(o => o.id === this.currentUser()?.outletId) ?? selectable[0];
+      if (selected) this.setOutlet(selected); else this.selectedOutletId.set(null);
+    } catch (error) {
+      this.availableOutlets.set([]); this.selectedOutletId.set(null); this.outletError.set(errorMessage(error));
+    } finally { this.outletsLoading.set(false); }
+  }
+  setOutlet(outlet: Outlet): void {
+    if (!this.availableOutlets().some(o => o.id === outlet.id)) return;
+    if (!this.currentUser()?.isSuperuser && outlet.id !== this.currentUser()?.outletId) return;
+    this.selectedOutletId.set(outlet.id);
+    if (this.browser) localStorage.setItem('selected_outlet_id', outlet.id);
+  }
+  login(credentials: LoginCredentials) {
+    this.sessionError.set('');
+    return this.http.post<TokenResponse>(`${this.baseUrl}/auth/login`, credentials).pipe(
+      tap(tokens => this.setTokens(tokens.access_token, tokens.refresh_token)),
+      switchMap(() => from(this.ensureSession(true)))
+    );
+  }
+  refreshToken() {
+    return defer(() => {
+      const refresh_token = this.getRefreshToken();
+      if (!refresh_token) throw new Error('Your session has expired. Please sign in again.');
+      return this.http.post<TokenResponse>(`${this.baseUrl}/auth/refresh`, { refresh_token },
+        { headers: { 'X-Skip-Interceptor': 'true' } }).pipe(tap(tokens => this.setTokens(tokens.access_token, tokens.refresh_token)));
     });
   }
-
-  public login(credentials: LoginCredentials): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.baseUrl}/auth/login`, credentials).pipe(
-      tap((res) => {
-        this.setTokens(res.access_token, res.refresh_token);
-        this.checkCurrentUser();
-      })
-    );
-  }
-
-  public refreshToken(): Observable<TokenResponse> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      this.redirectToLogin();
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    return this.http.post<TokenResponse>(
-      `${this.baseUrl}/auth/refresh`,
-      { refresh_token: refreshToken },
-      { headers: new HttpHeaders({ 'X-Skip-Interceptor': 'true' }) }
-    ).pipe(
-      tap((res) => {
-        this.setTokens(res.access_token, res.refresh_token);
-      }),
-      catchError((err) => {
-        this.clearTokens();
-        this.currentUser.set(null);
-        this.redirectToLogin();
-        return throwError(() => err);
-      })
-    );
-  }
-
-  public setOutlet(outlet: Outlet): void {
-    this.currentOutlet.set(outlet);
-  }
-
-  public logout(): void {
-    this.clearTokens();
-    this.currentUser.set(null);
-    this.redirectToLogin();
-  }
-
-  public redirectToLogin(): void {
-    if (this.isBrowser()) {
-      this.router.navigate(['/login']);
-    }
-  }
+  logout(): void { this.clearTokens(); this.redirectToLogin(); }
+  redirectToLogin(): void { if (this.browser) void this.router.navigate(['/login']); }
 }

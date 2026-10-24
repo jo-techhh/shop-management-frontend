@@ -1,0 +1,45 @@
+<div class="resource-page">
+  <header class="page-heading"><div><div class="breadcrumb">Workspace / {{ config().title }}</div><h1>{{ config().title }}</h1><p>{{ config().description }}</p></div>
+    <div class="heading-actions">
+      <button type="button" class="btn-secondary" (click)="load()" [disabled]="loading()" aria-label="Refresh data"><svg lucideRefreshCw [size]="16"></svg>Refresh</button>
+      @if (resource() === 'products' && canCreate()) { <button type="button" class="btn-secondary" (click)="open('category')">Add category</button> }
+      @if (canCreate() && (auth.currentOutlet() || resource() === 'outlets')) { <button type="button" class="btn-primary" (click)="open()"><svg lucidePlus [size]="16"></svg>{{ config().action }}</button> }
+    </div>
+  </header>
+  @if (auth.outletError()) { <div class="message error" role="alert">{{ auth.outletError() }}<button class="btn-secondary" (click)="auth.loadOutlets()">Retry outlets</button></div> }
+  @if (success()) { <div class="message success" role="status">{{ success() }}</div> }
+  @if (auth.outletError() && resource() !== 'outlets') { }
+  @else if (!auth.currentOutlet() && resource() !== 'outlets') {
+    <app-data-state title="Choose an outlet" description="Select an outlet from the header. If none exist, create your first outlet from Outlets." />
+  } @else if (loading() || error()) { <app-data-state [loading]="loading()" [error]="error()" (retry)="load()" /> }
+  @else if (!records().length) { <div class="panel"><app-data-state [title]="'No ' + config().title.toLowerCase() + ' yet'" [description]="config().empty" /></div> }
+  @else {
+    <div class="table-toolbar"><label class="search-box"><svg lucideSearch [size]="17" aria-hidden="true"></svg><input type="search" aria-label="Search records" placeholder="Search these records…" [ngModel]="query()" (ngModelChange)="query.set($event)" /></label><span>{{ filtered().length }} of {{ records().length }} records</span></div>
+    @if (!filtered().length) { <app-data-state title="No matching records" description="Try another search or clear your filters." /> }
+    @else { <div class="panel table-scroll"><table class="grid-table"><thead><tr>@for (column of config().columns; track column.key) { <th scope="col">{{ column.label }}</th> }<th scope="col">Actions</th></tr></thead><tbody>
+      @for (row of filtered(); track $index) { <tr>@for (column of config().columns; track column.key) { <td><span [class.status]="column.key === 'status'">{{ display(row, column) }}</span></td> }<td class="row-actions">
+        @if (resource() === 'products' && canCreate()) { <button class="btn-ghost" (click)="open('variant', row)">Add variant</button> }
+        @if (resource() === 'outlets') {
+          @if (row['is_active']) { <button class="btn-ghost" (click)="selectOutlet(row)">{{ auth.currentOutlet()?.id === row['id'] ? 'Selected' : 'Select' }}</button> }
+          @if (canCreate()) { <button class="btn-ghost" (click)="open('edit-outlet', row)">Edit</button> }
+        }
+        @if (resource() === 'orders') { <button class="btn-ghost" (click)="selected.set(row)">Details</button>@if (row['status'] === 'COMPLETED') { <button class="btn-ghost" (click)="viewReceipt(row)">Receipt</button> } }
+      </td></tr> }
+    </tbody></table></div> }
+  }
+</div>
+@if (modal()) {
+  <div class="modal-overlay"><section class="form-dialog" role="dialog" aria-modal="true" aria-labelledby="resource-form-title"><header><h2 id="resource-form-title">{{ formTitle() }}</h2><button type="button" class="btn-ghost" aria-label="Close form" [disabled]="saving()" (click)="modal.set(false)"><svg lucideX [size]="18"></svg></button></header>
+    @if (formError()) { <div class="message error" role="alert">{{ formError() }}</div> }
+    <form #entryForm="ngForm" (ngSubmit)="save()"><div class="form-fields">@for (field of fields(); track field.key) {
+      <label><span>{{ field.label }}{{ field.required ? ' *' : '' }}</span>
+        @if (field.options) { <select class="input-field" [name]="field.key" [(ngModel)]="form[field.key]" [required]="!!field.required"><option [ngValue]="undefined">Choose an option</option>@for (option of options(field.options); track option.value) { <option [value]="option.value">{{ option.label }}</option> }</select> }
+        @else { <input class="input-field" [type]="field.type || 'text'" [name]="field.key" [(ngModel)]="form[field.key]" [required]="!!field.required" [min]="field.min ?? null" [step]="field.type === 'number' ? (['quantity', 'quantity_change', 'initial_stock'].includes(field.key) ? '1' : '0.01') : null" /> }
+      </label>
+    }</div><footer><button type="button" class="btn-secondary" (click)="modal.set(false)" [disabled]="saving()">Cancel</button><button type="submit" class="btn-primary" [disabled]="saving() || entryForm.invalid">{{ saving() ? 'Saving…' : 'Save' }}</button></footer></form>
+  </section></div>
+}
+@if (selected() && resource() === 'orders') {
+  <div class="modal-overlay"><section class="form-dialog" role="dialog" aria-modal="true" aria-label="Order details"><header><h2>{{ selected()!['invoice_number'] }}</h2><button class="btn-ghost" (click)="selected.set(null)" aria-label="Close details"><svg lucideX [size]="18"></svg></button></header><p>Status: {{ selected()!['status'] }}</p><div class="table-scroll"><table class="grid-table"><thead><tr><th>Item</th><th>Quantity</th><th>Total</th></tr></thead><tbody>@for (item of selected()!['items']; track item.id) { <tr><td>{{ item.title }}</td><td>{{ item.quantity }}</td><td>{{ item.line_total | currency:'INR' }}</td></tr> }</tbody></table></div></section></div>
+}
+@if (receipt()) { <div class="modal-overlay"><section class="form-dialog" role="dialog" aria-modal="true" aria-label="Order receipt"><header><h2>Receipt</h2><button class="btn-ghost" (click)="receipt.set(null)" aria-label="Close receipt"><svg lucideX [size]="18"></svg></button></header><pre class="receipt">{{ receipt() }}</pre></section></div> }

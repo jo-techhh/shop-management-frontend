@@ -10,7 +10,7 @@ export type ActiveTheme = 'light' | 'dark';
 export class ThemeService {
   private readonly platformId = inject(PLATFORM_ID);
   
-  public readonly themeMode = signal<ThemeMode>('system');
+  public readonly themeMode = signal<ThemeMode>('light');
   public readonly activeTheme = signal<ActiveTheme>('light');
 
   constructor() {

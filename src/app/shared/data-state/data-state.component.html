@@ -1,0 +1,11 @@
+<section class="data-state" [class.is-error]="!!error()" [attr.role]="error() ? 'alert' : 'status'" aria-live="polite">
+  <div class="state-illustration" aria-hidden="true">
+    <span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+    @if (loading()) { <svg lucideLoaderCircle [size]="38" class="spinner"></svg> }
+    @else if (error()) { <svg lucideCircleAlert [size]="38" [strokeWidth]="1.5"></svg> }
+    @else { <svg lucideInbox [size]="42" [strokeWidth]="1.25"></svg> }
+  </div>
+  <h2>{{ loading() ? 'Loading your data…' : error() ? 'We couldn’t load this' : title() }}</h2>
+  <p>{{ loading() ? 'Fetching the latest records from the server.' : error() || description() }}</p>
+  @if (error()) { <button type="button" class="btn-secondary" (click)="retry.emit()">Try again</button> }
+</section>

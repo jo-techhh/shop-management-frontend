@@ -1,121 +1,40 @@
-import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
-import { Observable, of, catchError, map } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
+import { API_BASE_URL } from '../api.config';
 
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-  correlation_id?: string;
+export function errorMessage(error: unknown): string {
+  if (error instanceof HttpErrorResponse) {
+    if (error.status === 0) return 'Cannot reach the server. Check your connection and that the backend is running.';
+    const body = error.error;
+    const detail = body?.detail ?? body?.message ?? body?.error;
+    if (Array.isArray(detail)) return detail.map((d: { loc?: string[]; msg?: string }) => [d.loc?.filter(p => p !== 'body').join('.'), d.msg].filter(Boolean).join(': ')).join('; ');
+    if (typeof detail === 'string') return detail;
+    return error.message || `Request failed (HTTP ${error.status}).`;
+  }
+  return error instanceof Error ? error.message : 'An unexpected error occurred.';
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ApiService {
-  private http = inject(HttpClient);
-  private platformId = inject(PLATFORM_ID);
-  private baseUrl = 'http://localhost:8000/api/v1';
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = inject(API_BASE_URL);
+  public readonly isConnected = signal<boolean | null>(null);
+  public readonly revision = signal(0);
 
-  public isConnected = signal<boolean>(true);
-
-  private getHeaders(): HttpHeaders {
-    let token: string | null = null;
-    if (isPlatformBrowser(this.platformId)) {
-      token = localStorage.getItem('token') || localStorage.getItem('access_token');
-    }
-
-    let headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'X-Correlation-ID': `req-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
-    });
-
-    if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
-  }
-
-  public get<T>(endpoint: string, fallbackMock?: T): Observable<T> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of(fallbackMock as T);
-    }
-
-    return this.http.get<any>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders() }).pipe(
-      map(res => res.data !== undefined ? res.data : res),
-      catchError((err: HttpErrorResponse) => {
-        this.isConnected.set(false);
-        // Do NOT swallow 401 Unauthorized with fallbackMock — let the interceptor/guard handle refresh & redirect
-        if (err.status === 401) {
-          throw err;
-        }
-        if (fallbackMock !== undefined) {
-          return of(fallbackMock);
-        }
-        throw err;
-      })
+  private request<T>(method: string, endpoint: string, body?: unknown): Observable<T> {
+    return this.http.request<T | { data: T }>(method, `${this.baseUrl}${endpoint}`, { body }).pipe(
+      map(response => response && typeof response === 'object' && 'data' in response ? response.data : response as T),
+      tap(() => { this.isConnected.set(true); if (method !== 'GET') this.revision.update(value => value + 1); }),
+      catchError(error => { this.isConnected.set(false); return throwError(() => error); })
     );
   }
-
-  public post<T>(endpoint: string, body: any, fallbackMock?: T): Observable<T> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of(fallbackMock as T);
-    }
-
-    return this.http.post<any>(`${this.baseUrl}${endpoint}`, body, { headers: this.getHeaders() }).pipe(
-      map(res => res.data !== undefined ? res.data : res),
-      catchError((err: HttpErrorResponse) => {
-        this.isConnected.set(false);
-        if (err.status === 401) {
-          throw err;
-        }
-        if (fallbackMock !== undefined) {
-          return of(fallbackMock);
-        }
-        throw err;
-      })
-    );
+  get<T>(endpoint: string): Observable<T> { return this.request<T>('GET', endpoint); }
+  post<T>(endpoint: string, body: unknown): Observable<T> { return this.request<T>('POST', endpoint, body); }
+  postIdempotent<T>(endpoint: string, body: unknown, key: string): Observable<T> {
+    return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, { headers: { 'Idempotency-Key': key } });
   }
-
-  public put<T>(endpoint: string, body: any, fallbackMock?: T): Observable<T> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of(fallbackMock as T);
-    }
-
-    return this.http.put<any>(`${this.baseUrl}${endpoint}`, body, { headers: this.getHeaders() }).pipe(
-      map(res => res.data !== undefined ? res.data : res),
-      catchError((err: HttpErrorResponse) => {
-        this.isConnected.set(false);
-        if (err.status === 401) {
-          throw err;
-        }
-        if (fallbackMock !== undefined) {
-          return of(fallbackMock);
-        }
-        throw err;
-      })
-    );
-  }
-
-  public delete<T>(endpoint: string, fallbackMock?: T): Observable<T> {
-    if (!isPlatformBrowser(this.platformId)) {
-      return of(fallbackMock as T);
-    }
-
-    return this.http.delete<any>(`${this.baseUrl}${endpoint}`, { headers: this.getHeaders() }).pipe(
-      map(res => res.data !== undefined ? res.data : res),
-      catchError((err: HttpErrorResponse) => {
-        this.isConnected.set(false);
-        if (err.status === 401) {
-          throw err;
-        }
-        if (fallbackMock !== undefined) {
-          return of(fallbackMock);
-        }
-        throw err;
-      })
-    );
-  }
+  put<T>(endpoint: string, body: unknown): Observable<T> { return this.request<T>('PUT', endpoint, body); }
+  patch<T>(endpoint: string, body: unknown): Observable<T> { return this.request<T>('PATCH', endpoint, body); }
+  delete<T>(endpoint: string): Observable<T> { return this.request<T>('DELETE', endpoint); }
 }

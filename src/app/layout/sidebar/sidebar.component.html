@@ -1,0 +1,44 @@
+<aside class="sidebar">
+  <a routerLink="/overview" class="brand" aria-label="RetailOps home">
+    <span class="brand-mark"><i></i><i></i><i></i></span>
+    <span class="brand-name">Retail<span>Ops</span></span>
+  </a>
+
+  <nav class="nav-scroll" aria-label="Main navigation">
+    <div class="nav-group">
+      <p>Workspace</p>
+      <a routerLink="/overview" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideHouse [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Overview</span></a>
+      <a routerLink="/pos" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideCalculator [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Point of sale</span></a>
+      <a routerLink="/orders" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideReceiptText [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Orders</span></a>
+    </div>
+
+    <div class="nav-group">
+      <p>Store</p>
+      <a routerLink="/products" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucidePackage [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Products</span></a>
+      <a routerLink="/inventory" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideWarehouse [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Inventory</span>@if(inventoryService.lowStockAlertsCount()>0){<b class="count">{{ inventoryService.lowStockAlertsCount() }}</b>}</a>
+      <a routerLink="/transfers" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideArrowLeftRight [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Transfers</span></a>
+      <a routerLink="/customers" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideUsers [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Customers</span></a>
+      <a routerLink="/outlets" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideStore [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Outlets</span></a>
+    </div>
+
+    <div class="nav-group">
+      <p>Insights</p>
+      <a routerLink="/analytics" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideChartNoAxesCombined [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Analytics</span></a>
+      <a routerLink="/events" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideActivity [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Activity log</span></a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a routerLink="/settings" routerLinkActive="active" class="nav-item"><span class="nav-icon"><svg lucideSettings [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg></span><span>Settings</span></a>
+    <a routerLink="/settings" class="support-card"><span><svg lucideSettings [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg></span><div><strong>Your workspace</strong><small>Appearance &amp; preferences</small></div><svg lucideArrowRight [size]="14" [strokeWidth]="1.75" aria-hidden="true"></svg></a>
+  </div>
+</aside>
+
+<details class="mobile-nav" #mobileNav>
+  <summary><svg lucideMenu [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg><span>RetailOps · Browse workspace</span><svg lucideChevronDown [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg></summary>
+  <nav class="mobile-links" aria-label="Mobile navigation" (click)="mobileNav.open = false">
+    @for (link of mobileLinks; track link.path) {
+      <a [routerLink]="link.path" routerLinkActive="active">{{ link.label }}</a>
+    }
+  </nav>
+</details>

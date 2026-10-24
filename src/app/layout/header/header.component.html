@@ -1,0 +1,41 @@
+<header class="workspace-header">
+  <div class="workspace-context"><span class="workspace-symbol">R</span><span>Workspace</span><span>/</span><strong>Retail operations</strong></div>
+  <div class="header-actions">
+    <div class="menu-anchor">
+      <button type="button" class="outlet-trigger" (click)="toggleOutletMenu($event)" [attr.aria-expanded]="isOutletMenuOpen()" aria-label="Select outlet">
+        <span class="status-dot"></span><span>{{ authService.currentOutlet()?.name || 'Select outlet' }}</span><svg lucideChevronDown [size]="14" [strokeWidth]="1.75" aria-hidden="true"></svg>
+      </button>
+      @if (isOutletMenuOpen()) {
+        <div class="header-menu" (click)="$event.stopPropagation()">
+          <div class="menu-title">Switch outlet</div>
+          @if (authService.outletsLoading()) { <div class="menu-title">Loading outlets…</div> }
+          @if (authService.outletError()) { <div class="menu-title" role="alert">{{ authService.outletError() }}</div><button type="button" class="menu-item" (click)="authService.loadOutlets()">Try again</button> }
+          @if (!authService.outletsLoading() && !authService.outletError() && !authService.availableOutlets().length) { <div class="menu-title">No outlets yet. Create an outlet from Outlets.</div> }
+          @for (outlet of authService.availableOutlets(); track outlet.id) {
+            <button type="button" class="menu-item" [class.selected]="outlet.id === authService.currentOutlet()?.id" (click)="onSelectOutlet(outlet, $event)">
+              <span><strong>{{ outlet.name }}</strong><small>{{ outlet.address || 'No address recorded' }} · {{ outlet.code }}</small></span>
+              @if (outlet.id === authService.currentOutlet()?.id) { <svg lucideCheck [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg> }
+            </button>
+          }
+        </div>
+      }
+    </div>
+    <button type="button" class="icon-button" (click)="toggleTheme()" [attr.aria-label]="themeService.activeTheme() === 'light' ? 'Use dark appearance' : 'Use light appearance'">
+      @if (themeService.activeTheme() === 'light') { <svg lucideMoon [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg> } @else { <svg lucideSun [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg> }
+    </button>
+    <div class="menu-anchor">
+      <button type="button" class="profile-trigger" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="isProfileMenuOpen()" aria-label="Account menu">
+        <span class="profile-avatar">{{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}</span>
+        <span class="profile-label">{{ authService.currentUser()?.fullName || 'Your account' }}</span><svg lucideChevronDown [size]="14" [strokeWidth]="1.75" aria-hidden="true"></svg>
+      </button>
+      @if (isProfileMenuOpen()) {
+        <div class="header-menu" (click)="$event.stopPropagation()">
+          <div class="menu-title">{{ authService.currentUser()?.email }}</div>
+          <button type="button" class="menu-item" (click)="goTo('/settings')"><svg lucideSettings [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>Settings</button>
+          <button type="button" class="menu-item" (click)="goTo('/pos')"><svg lucideCalculator [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>Open register</button>
+          <button type="button" class="menu-item logout" (click)="logout()"><svg lucideLogOut [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>Sign out</button>
+        </div>
+      }
+    </div>
+  </div>
+</header>

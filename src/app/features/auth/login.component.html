@@ -1,4 +1,15 @@
-<div class="login-page bg-grid-subtle">
+<div class="login-page">
+  <aside class="login-story">
+    <a class="story-brand" href="/"><span>R</span>RetailOps</a>
+    <div class="story-content">
+      <span class="story-eyebrow">YOUR RETAIL WORKSPACE</span>
+      <h2>A little more clarity.<br>A better day in store.</h2>
+      <p>Sales, inventory, and your team, together in one simple workspace.</p>
+      <div class="store-illustration" aria-hidden="true"><svg lucideStore [size]="56" [strokeWidth]="1.25"></svg><p>Everything your store needs, in one workspace.</p></div>
+      <div class="story-features"><span>✓ Faster checkout</span><span>✓ Clearer inventory</span><span>✓ Connected outlets</span></div>
+    </div>
+    <div class="story-footer">Built for the way your store works.</div>
+  </aside>
   <!-- Theme Switcher Top-Right -->
   <div class="theme-bar">
     <button
@@ -8,13 +19,9 @@
       [title]="themeService.activeTheme() === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'"
     >
       @if (themeService.activeTheme() === 'light') {
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-        </svg>
+        <svg lucideMoon [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
       } @else {
-        <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
+        <svg lucideSun [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
       }
     </button>
   </div>
@@ -29,16 +36,14 @@
             <path d="M8 10h4v4H8zm6 0h4v4h-4zm6 0h4v4h-4zM8 16h4v4H8zm6 0h4v4h-4zm6 0h4v4h-4zM11 22h10v2H11z" fill="white" opacity="0.95"/>
           </svg>
         </div>
-        <h1 class="login-title">Welcome to RetailOps</h1>
-        <p class="login-subtitle">Sign in with your staff account to access your store operations dashboard</p>
+        <h1 class="login-title">Welcome back</h1>
+        <p class="login-subtitle">Sign in to your RetailOps workspace to get started.</p>
       </div>
 
       <!-- Error Alert Banner -->
       @if (errorMessage()) {
         <div class="alert-box alert-danger">
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <svg lucideCircleAlert [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
           <span>{{ errorMessage() }}</span>
         </div>
       }
@@ -46,9 +51,7 @@
       <!-- Session Expired Banner -->
       @if (isSessionExpired()) {
         <div class="alert-box alert-warning">
-          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <svg lucideTriangleAlert [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
           <span>Session expired or token refresh failed. Please sign in again.</span>
         </div>
       }
@@ -58,9 +61,7 @@
         <div class="form-group">
           <label for="email" class="form-label">Email Address</label>
           <div class="input-with-icon">
-            <svg class="field-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-            </svg>
+            <svg lucideMail class="field-icon" [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
             <input
               id="email"
               type="email"
@@ -77,12 +78,10 @@
         <div class="form-group">
           <div class="label-row">
             <label for="password" class="form-label">Password</label>
-            <a href="javascript:void(0)" class="forgot-link">Forgot?</a>
+
           </div>
           <div class="input-with-icon">
-            <svg class="field-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
+            <svg lucideLockKeyhole class="field-icon" [size]="18" [strokeWidth]="1.75" aria-hidden="true"></svg>
             <input
               id="password"
               [type]="showPassword() ? 'text' : 'password'"
@@ -100,14 +99,9 @@
               title="Toggle Password Visibility"
             >
               @if (showPassword()) {
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                </svg>
+                <svg lucideEyeOff [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>
               } @else {
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
+                <svg lucideEye [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>
               }
             </button>
           </div>
@@ -124,29 +118,11 @@
             <span>Signing in...</span>
           } @else {
             <span>Sign In to Dashboard</span>
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+            <svg lucideArrowRight [size]="16" [strokeWidth]="1.75" aria-hidden="true"></svg>
           }
         </button>
       </form>
 
-      <!-- Demo Quick Logins -->
-      <div class="demo-section">
-        <div class="demo-divider">
-          <span>DEMO ACCOUNTS</span>
-        </div>
-        <div class="demo-buttons-grid">
-          <button type="button" class="btn-demo" (click)="fillDemo('admin@retailops.io', 'Admin@123')">
-            <span class="demo-role">Store Admin</span>
-            <span class="demo-email">admin&#64;retailops.io</span>
-          </button>
-          <button type="button" class="btn-demo" (click)="fillDemo('jobi@retailops.io', 'Jobi@123')">
-            <span class="demo-role">Cashier</span>
-            <span class="demo-email">jobi&#64;retailops.io</span>
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
